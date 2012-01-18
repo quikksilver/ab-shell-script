@@ -1,0 +1,12 @@
+Package: pkg1
+Version: 1.0
+Maintainer: d1
+
+Package: pk2
+Version: 2.0
+Maintainer: d2
+
+Package: pkg3
+Version: 3.0
+Maintainer: d3
+
