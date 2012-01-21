@@ -1,0 +1,5 @@
+Package: ab-shell-script
+Version: 0.1
+Architecture: all
+Maintainer: Axel Bentsson axel.bengtsson@gmail.com
+Description: Just some handy scripts.

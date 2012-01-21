@@ -1,5 +1,17 @@
 /**
- * 
+ * Copyright 2012 Axel Bengtsson
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+
+  *    http://www.apache.org/licenses/LICENSE-2.0
+
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package ab.json.shell;
 
@@ -9,12 +21,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static ab.json.shell.Utils.FILE;
+import static ab.json.shell.Utils.HELP;
+import ab.json.shell.Utils.Obj;
+import ab.json.shell.Utils.ReturnValue;
 
 /**
  * @author Axel Bengtsson (axel.bengtsson@gmail.com)
@@ -23,27 +38,11 @@ import java.util.regex.Pattern;
 public class ToJsonMain {
 
   private static final String REGEX = "--regex=";
-  private static final String HELP = "--help";
-  private static final String FILE = "--file=";
   private static final String NEWLINE = "--newline=";
 
   private InputStream inputStream = System.in;
   private Pattern regex = null;
   private String newline = null;
-
-  private enum ReturnValue {
-    OK, HELP, ERROR
-  };
-
-  private class Obj {
-    Map<String, String> values = new HashMap<String, String>();
-    Map<String, Obj> valuesObj = new HashMap<String, ToJsonMain.Obj>();
-
-    @Override
-    public String toString() {
-      return values.toString() + " " + valuesObj.toString();
-    }
-  }
 
   /**
    * Main method.
@@ -102,7 +101,7 @@ public class ToJsonMain {
         }
       }
     }
-    return returnValue.ordinal();
+    return returnValue.toInt();
   }
 
   /**
@@ -163,12 +162,7 @@ public class ToJsonMain {
       if (arg.startsWith(REGEX)) {
         regex = Pattern.compile(arg.substring(REGEX.length()));
       } else if (arg.startsWith(HELP)) {
-        System.out.println("Usage:");
-        System.out.println("echo foo baa | tojson n1 n2");
-        System.out.println("{n1 : \"foo\", n2 : \"baa\"}");
-        System.out
-            .println("echo '<foo name=\"baa\" age=\"12\"' | tojson --regex=.*name=(.+).*age=(.+).* name age");
-        System.out.println("{name : \"baa\", age : \"12\"}");
+        printHelp();
         returnValue = ReturnValue.HELP;
       } else if (arg.startsWith(FILE)) {
         try {
@@ -184,6 +178,22 @@ public class ToJsonMain {
       }
     }
     return returnValue;
+  }
+
+  private void printHelp() {
+    System.out.println("Usage: <options> key1, key2, ...");
+    System.out.println("Example:");
+    System.out.println("  $echo foo baa | tojson n1 n2");
+    System.out.println("  {n1 : \"foo\", n2 : \"baa\"}");
+    System.out.println("  $echo '<foo name=\"baa\" age=\"12\"' | tojson --regex=.*name=(.+).*age=(.+).* name age");
+    System.out.println("  {name : \"baa\", age : \"12\"}");
+    System.out.println("  $cat Packages | tojson '--newline=' '--regex=.*Package\\: (.+) Version\\: (.+?) .*' name version");
+    System.out.println("  {name : \"pkg3\",version : \"3.0\"} ");
+    System.out.println("Options: ");
+    System.out.println("  " + FILE + "<file to read instead of standard in>");
+    System.out.println("  " + REGEX + "<Java regex> (instead of having \" \" as seperator)");
+    System.out.println("  " + HELP + " Show this");
+    System.out.println("  " + NEWLINE + "<Instead of read to newline read to this line>");
   }
 
   public static void main(String[] args) {

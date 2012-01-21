@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     Jan 21, 2012 5:07:05 PM
+
+     project        ab-shell-script
+     description    Set of java program for bash shell.
+                   
+     Axel Bengtsson
+     ====================================================================== -->
+<project name="project" default="default">
+	<description>
+            Set if java program for bash shell.
+  </description>
+
+	<!-- ================================= 
+          Compile and create a Debian package
+         ================================= -->
+	<target name="default" description="description">
+		<mkdir dir="debian-package/opt/ab-shell-script/opt/ab-shell-script/lib" />
+		<javac srcdir="src" destdir="debian-package/opt/ab-shell-script" classpath="lib/gson-2.1.jar" debug="on" />
+		<copy file="lib/gson-2.1.jar" todir="debian-package/opt/ab-shell-script/lib" />
+		<copy file="lib/LICENSE" todir="debian-package/opt/ab-shell-script/lib" />
+		<exec executable="dpkg-deb">
+			<arg value="--build" />
+			<arg value="debian-package" />
+		</exec>
+	</target>
+
+
+
+</project>
