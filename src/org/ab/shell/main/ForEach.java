@@ -20,14 +20,15 @@ import static ab.json.shell.Utils.HELP;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
+import ab.json.shell.ExecuteCommand;
 import ab.json.shell.Utils.ReturnValue;
 
 import com.google.gson.GsonBuilder;
@@ -53,16 +54,24 @@ public class ForEach {
       String s;
       final StringBuilder sb = new StringBuilder("");
       try {
-        while ((s = in.readLine()) != null || sb.length() != 0) {
+        while ((s = in.readLine()) != null) {
           sb.append(s);
         }
         objectReferenc = new GsonBuilder().create().fromJson(sb.toString(), new TypeToken< List<Map<String, String>>>(){}.getType());
         for (Map<String, String> obj : objectReferenc) {
-          System.out.println(obj.toString());
+          if (scriptLine != null) {
+            ExecuteCommand.execCmd(creatteBashCmd(obj));
+          } else {
+            System.out.println(obj.toString());
+          }
         }
       } catch (IOException e) {
         e.printStackTrace(System.err);
         returnValue = ReturnValue.ERROR;
+      } catch (InterruptedException e) {
+        e.printStackTrace(System.err);
+        returnValue = ReturnValue.ERROR;
+        e.printStackTrace();
       } finally {
         try {
           in.close();
@@ -73,6 +82,22 @@ public class ForEach {
     }
     return returnValue.toInt();
   }
+
+  private String[] creatteBashCmd(Map<String, String> map) {
+    List<String> cmd = new LinkedList<String>();
+    cmd.add("bash");
+    cmd.add("-c");
+    cmd.add(scriptLine);
+    for (int i = 0; i < map.size() ; i++) {
+      cmd.add(map.get(String.valueOf(i)));
+    }
+    return cmd.toArray(new String[cmd.size()]);
+  }
+  /**
+   * 
+   * @param args
+   * @return
+   */
   private ReturnValue parseArguments(final String[] args) {
     ReturnValue returnValue = ReturnValue.OK;
     for (String arg : args) {
@@ -81,10 +106,18 @@ public class ForEach {
       } else if (arg.startsWith(HELP)) {
         //printHelp(); TODO
         returnValue = ReturnValue.HELP;
-      } else if (arg.startsWith(FILE)) {} 
+      } else if (arg.startsWith(FILE)) {
+        try {
+          inputStream = new FileInputStream(arg.substring(FILE.length()));
+        } catch (IOException e) {
+          e.printStackTrace(System.err);
+          returnValue = ReturnValue.ERROR;
+        }
+      } 
     }
     return returnValue;
   }
+
   /**
    * @param args
    */

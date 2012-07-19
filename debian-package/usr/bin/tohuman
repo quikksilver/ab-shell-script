@@ -1,2 +1,0 @@
-#!/bin/bash
-java -cp /opt/ab-shell-script/:/opt/ab-shell-script/lib/gson-2.1.jar ab/json/shell/ToHumanMain "$@"

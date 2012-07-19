@@ -59,7 +59,7 @@ public class ToStruct {
       String s;
       final StringBuilder sb = new StringBuilder("");
       try {
-        while ((s = in.readLine()) != null || sb.length() != 0) {
+        while ((s = in.readLine()) != null) {
           if (newline != null) {
             if (s == null || s.equals(newline)) {
               s = sb.toString();
@@ -68,7 +68,9 @@ public class ToStruct {
               continue;
             }
           }
-          objectReferenc.add(addObj(s));
+          if (!s.isEmpty()) {
+            objectReferenc.add(addObj(s));
+          }
         }
         System.out.println(new GsonBuilder().create().toJson(objectReferenc));
       } catch (IOException e) {
