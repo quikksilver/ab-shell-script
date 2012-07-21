@@ -13,24 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ab.json.shell;
+package org.ab.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.util.List;
+import java.util.Arrays;
 
 /**
+ * Execute commands.
  * @author axel
- *
  */
 public class ExecuteCommand {
 
+  /**
+   * Read stream and save it in a String.
+   * @author axel
+   */
   private static class ReadStream implements Runnable {
-    InputStream inputStream = null;
-    boolean print;
+    final InputStream inputStream;
+    final boolean print;
+    final StringBuilder sb = new StringBuilder("");
+
     public ReadStream(InputStream inputStream, boolean print) {
       this.inputStream = inputStream;
       this.print = print;
@@ -44,36 +49,52 @@ public class ExecuteCommand {
         while ((s = in.readLine()) != null) {
           if (print) {
             System.out.println(s);
+            sb.append(s).append("\n");
           }
         }
       } catch (IOException e) {
        e.printStackTrace();
+      } finally {
+        try {
+          in.close();
+        } catch (IOException e) {
+          e.printStackTrace(System.err);
+        }
       }
     }
-    
+    public String getStringStrream() {
+      return sb.toString();
+    }
   }
 
-  public static List<String> execCmd(final String[] cmd) throws IOException, InterruptedException{
-    List<String> stdOut = null;
+  /**
+   * Execute command and get String from standard out.
+   * @param cmd - THe command in a String array.
+   * @return - A string of standard out.
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  public static String execCmd(final String[] cmd) throws IOException, InterruptedException{
     Runtime rt = Runtime.getRuntime();
     Process pr = null;
+    ReadStream std = null;
     try {
       pr = rt.exec(cmd);
-      ReadStream std = new ExecuteCommand.ReadStream(pr.getInputStream(), true);
+      std = new ExecuteCommand.ReadStream(pr.getInputStream(), true);
       ReadStream err = new ExecuteCommand.ReadStream(pr.getErrorStream(), false);
 
       std.run();
       err.run();
-      
-      //TODO: Start two threads that reads stdOut and errOut.
+
       int exitValue = pr.waitFor();
       if (exitValue != 0) {
-        throw new IOException(cmd + " got exit code: " + exitValue);
+        throw new IOException(Arrays.toString(cmd) + " got exit code: "
+            + exitValue + "\nError: " + err.getStringStrream());
       }
     } finally {
       if (pr != null)
       pr.destroy();
     }
-    return stdOut;
+    return std.getStringStrream();
   }
 }

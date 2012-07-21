@@ -15,8 +15,8 @@
  */
 package org.ab.shell.main;
 
-import static ab.json.shell.Utils.FILE;
-import static ab.json.shell.Utils.HELP;
+import static org.ab.Utils.Utils.FILE;
+import static org.ab.Utils.Utils.HELP;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -29,9 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.ab.Utils.Utils.ReturnValue;
+
 import com.google.gson.GsonBuilder;
 
-import ab.json.shell.Utils.ReturnValue;
 
 public class ToStruct {
   private static final String REGEX = "--regex=";
